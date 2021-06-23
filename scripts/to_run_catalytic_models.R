@@ -2,13 +2,6 @@
 #### Catalytic Model ####
 #########################
 
-## load packages
-library(ggplot2)
-
-
-## source model functions
-source("Catalytic_models/cat_model_functions.R") 
-    
 
 ## read in data
 original_all <- readRDS("MixtureSims_serostatus_categorised.RDS")
@@ -55,12 +48,12 @@ for(sim in 1:200){
   
   
   ## plotting
-  source("Catalytic_models/plotting_catalytic_models_1.R") 
+  source("scripts/plotting_catalytic_models_1.R") 
   
   }
 
-saveRDS(store_foiV, "Cat_MixtureSims_est_FOI_variable.RDS")
-saveRDS(store_spV, "Cat_MixtureSims_est_SP_variable.RDS")
-saveRDS(store_foiC, "Cat_MixtureSims_est_FOI_constant.RDS")
-saveRDS(store_spC, "Cat_MixtureSims_est_SP_constant.RDS")
+saveRDS(store_foiV, "model_output/catalytic/Cat_MixtureSims_est_FOI_variable.RDS")
+saveRDS(store_spV, "model_output/catalytic/Cat_MixtureSims_est_SP_variable.RDS")
+saveRDS(store_foiC, "model_output/catalytic/Cat_MixtureSims_est_FOI_constant.RDS")
+saveRDS(store_spC, "model_output/catalytic/Cat_MixtureSims_est_SP_constant.RDS")
 

@@ -2,10 +2,6 @@
 #### Mixture Model ####
 #######################
 
-rm(list=ls())
-library("ggplot2")
-library("mixdist")
-
 
 ##################################
 ## STEP 1 - fitting the mixture ##
@@ -20,19 +16,17 @@ library("mixdist")
                                 chisq=NA, p=NA, seroprev=NA, seroprev_low=NA, seroprev_upp=NA,
                                 foi =NA, foi_low =NA, foi_upp =NA)
     
-## read in functions
-    source("Mixture_model/mix_fitting_functions.R") 
-    
+
 ## read in simulated data
     data <- readRDS("MixtureSims.rds")
     
 ## loop
     # N.B may have to manually run iterations if distributions cannot be fit (will throw error and stop loop)
     for(sim_num in 1:200){
-    #sim_num <- 1
+     # sim_num<-1
       
-    data <- data[sim_num]
-    z<-data[[1]]$seroval 
+    data_sub <- data[[sim_num]]
+    z<-data_sub$seroval 
     breaks = 50
     mixdat <- mixgroup(z, breaks) # functions from mixdist package to group data
     mixpar <- mixparam(pi=c(0.5, 0.5), mu = c(0.5,3), sigma = c(1, 1))
@@ -109,10 +103,10 @@ library("mixdist")
     
      
     # source R code files for plotting and storing params
-    source("Mixture_model/plotting_mixture_model_1.R") 
+    source("scripts/plotting_mixture_model_1.R") 
    
     }
-    write.csv(stored_params, file = "Mix_fit_params.csv") #save params for the 200 simulated datasets
+    write.csv(stored_params, file = "model_output/mixture/Mix_fit_params.csv") #save params for the 200 simulated datasets
     
     
  
@@ -121,28 +115,23 @@ library("mixdist")
 ## STEP 2 - calculating seroprevalence & FOI ##
 ###############################################
     
-    library("serostat") 
-          # for the mpspline.fit function
-          # see https://rdrr.io/github/TeaKov/serostat/src/R/mpsplinefit.R
-    
-    source("Mixture_model/mix_calc_functions.R") 
     
     ## prepare storage data frame for params 
     stored_params <- data.frame(sim=1:200, seroprev=NA, seroprev_low=NA, seroprev_upp=NA, foi =NA, foi_low =NA, foi_upp =NA)
-    mixfit_params <- read.csv("Mix_fit_params.csv")
+    mixfit_params <- read.csv("model_output/mixture/Mix_fit_params.csv")
     mixfit_params<-mixfit_params[,-c(1, 18:24)]
     stored_params <- merge(mixfit_params, stored_params, by="sim")
       
     ## loop
     data <- readRDS("MixtureSims.rds")
     for(sim_num in 1:200){
-      data <- data[sim_num]
+      data_sub <- data[[sim_num]]
       
-      z<-data[[1]]$seroval  
-      a<-data[[1]]$age+0.5 
+      z<-data_sub$seroval  
+      a<-data_sub$age+0.5 
       z_and_a <- data.frame(z=z, a=a)
-      agemin <- min(data[[1]]$age)+0.5
-      agemax <- max(data[[1]]$age)+0.5
+      agemin <- min(data_sub$age)+0.5
+      agemax <- max(data_sub$age)+0.5
       
     
     ## optimise parameters for spline fitting function
@@ -165,8 +154,6 @@ library("mixdist")
     mu_a_plotting$mu_a_upper <- spline_mu_output[[3]]$upper.ci
     
     ## estimate seroprevalence
-        #dist0 <- stored_params$dist0[sim]
-        #dist1	<- stored_params$dist1[sim]
         muS	<- stored_params$mu0[sim_num]
         muI	<- stored_params$mu1[sim_num]
         SigS	<- stored_params$sd0[sim_num]
@@ -204,9 +191,9 @@ library("mixdist")
       
     
     ## plotting    
-    source("Mixture_model/plotting_mixture_model_2.R")
+    source("scripts/plotting_mixture_model_2.R")
         
     }
     
-    write.csv(stored_params, file = "Mix_fit_and_est_params.csv")
+    write.csv(stored_params, file = "model_output/mixture/Mix_fit_and_est_params.csv")
     

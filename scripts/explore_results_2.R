@@ -3,9 +3,6 @@
 ## 2. Catalytic models ########################
 ###############################################
 
-## load packages
-library(ggplot2)
-
 
 ##################################
 # calculating bias and uncertainty
@@ -16,7 +13,7 @@ library(ggplot2)
             est_foi_variable<-list()
             est_sp_variable<-list()
             for(i in 1:200){
-              summary <- read.csv(paste("Cat_", i, "_SummaryResults.csv", sep=""))
+              summary <- read.csv(paste("model_output/catalytic/Cat_", i, "_SummaryResults.csv", sep=""))
               
               foi<- c(summary$Value[4], summary$Value[5], summary$Value[6])
               sp<- c(summary$Value[10], summary$Value[11], summary$Value[12])
@@ -76,9 +73,12 @@ library(ggplot2)
             }
             
             newdata2<-newdata[newdata$Parameter=="FOI",]
-            sum(newdata2$within)/200
+            x <- sum(newdata2$within)/200
             newdata2<-newdata[newdata$Parameter!="FOI",]
-            sum(newdata2$within)/200
+            y <- sum(newdata2$within)/200
+            results <- data.frame(Param = c("FOI", "Serop"), Perc = c(x,y))
+            write.csv(results, "Cat_V_results_est_perc_correct.csv")
+            
             
             # store for later
             CATVDATA <- newdata
@@ -93,7 +93,7 @@ library(ggplot2)
             est_foi_constant<-list()
             est_sp_constant<-list()
             for(i in 1:200){
-              summary <- read.csv(paste("Cat_", i, "_SummaryResults.csv", sep=""))
+              summary <- read.csv(paste("model_output/catalytic/Cat_", i, "_SummaryResults.csv", sep=""))
               
               foi<- c(summary$Value[1], summary$Value[2], summary$Value[3])
               sp<- c(summary$Value[7], summary$Value[8], summary$Value[9])
@@ -137,9 +137,12 @@ library(ggplot2)
             }
             
             newdata2<-newdata[newdata$Parameter=="FOI",]
-            sum(newdata2$within)/200
+            x<- sum(newdata2$within)/200
             newdata2<-newdata[newdata$Parameter!="FOI",]
-            sum(newdata2$within)/200
+            y <- sum(newdata2$within)/200
+            
+            results <- data.frame(Param = c("FOI", "Serop"), Perc = c(x,y))
+            write.csv(results, "Cat_C_results_est_perc_correct.csv")
             
             # store for later
             CATCDATA <- newdata
@@ -153,7 +156,7 @@ library(ggplot2)
 
 
 # time-constant
-ggplot(CATCDATA) + facet_wrap("Parameter", scales="free")+
+con_plot <- ggplot(CATCDATA) + facet_wrap("Parameter", scales="free")+
   geom_point(aes(x=True, y=Est, col=within), size=2, alpha=0.4) +
   geom_errorbar(aes(x=True, ymin=Est_low, ymax=Est_upp, col=within), alpha=0.4)+
   theme_bw() +
@@ -162,9 +165,10 @@ ggplot(CATCDATA) + facet_wrap("Parameter", scales="free")+
   theme(axis.text = element_text(size=15), axis.title = element_text(size=20),
         strip.text = element_text(size=15), legend.position = "none")
 
+ggsave(plot = con_plot, filename = "Cat_C_results_est_vs_true.png")
 
 # time-varying
-ggplot(CATVDATA) + facet_wrap("Parameter", scales="free")+
+var_plot <- ggplot(CATVDATA) + facet_wrap("Parameter", scales="free")+
   geom_point(aes(x=True, y=Est, col=within), size=2, alpha=0.4) +
   geom_errorbar(aes(x=True, ymin=Est_low, ymax=Est_upp, col=within), alpha=0.4)+
   theme_bw() +
@@ -173,4 +177,5 @@ ggplot(CATVDATA) + facet_wrap("Parameter", scales="free")+
   theme(axis.text = element_text(size=15), axis.title = element_text(size=20),
         strip.text = element_text(size=15), legend.position = "none")
 
+ggsave(plot = var_plot, filename = "Cat_V_results_est_vs_true.png")
 

@@ -29,7 +29,7 @@
                                        "FOI_v","FOI_v_LOW", "FOI_v_UPP",
                                        "SP_c", "SP_c_LOW", "SP_c_UPP", 
                                        "SP_v","SP_v_LOW", "SP_v_UPP"), Value = Results)
-    write.csv(Results, file=paste("Cat_", sim, "_SummaryResults.csv", sep=""))
+    write.csv(Results, file=paste("model_output/catalytic/Cat_", sim, "_SummaryResults.csv", sep=""))
     
     
     ## enter into storage list for all 200 datasets
@@ -42,7 +42,7 @@
 
 ## save FOI by age for time-varying model 
     FOI_by_age <- data.frame(Age = loc.all$Age, FOI = fit.v_CI[[1]], FOI_low = fit.v_CI[[2]], FOI_upp = fit.v_CI[[3]])
-    write.csv(FOI_by_age, paste("Cat_", sim, "_FOI_by_age.csv", sep=""))
+    write.csv(FOI_by_age, paste("model_output/catalytic/Cat_", sim, "_FOI_by_age.csv", sep=""))
 
     
    
@@ -59,7 +59,7 @@
     y_upp<-SP_c_FOI$Upper
     
     Seropositive_by_age <- data.frame(Age = age, Serop_count = prop.seropos, Serop_model = y, Serop_model_low = y_low, Serop_model_upp = y_upp)
-    write.csv(Seropositive_by_age, paste("Cat_", sim, "_Seropositive_by_age_CONSTANT_FOI.csv", sep=""))
+    write.csv(Seropositive_by_age, paste("model_output/catalytic/Cat_", sim, "_Seropositive_by_age_CONSTANT_FOI.csv", sep=""))
     
     seroplot <- ggplot(Seropositive_by_age, aes(x=Age, y=Serop_model)) +
         geom_line(col = "black") +
@@ -74,7 +74,7 @@
         scale_x_continuous(breaks=min(age):max(age))
     
     seroplot
-    ggsave(filename = paste("Cat_", sim, "_Seroprevalence_constant_FOI.png", sep=""), plot = seroplot)
+    ggsave(filename = paste("model_output/catalytic/Cat_", sim, "_Seroprevalence_constant_FOI.png", sep=""), plot = seroplot)
     
      
     ## variable FOI
@@ -83,7 +83,7 @@
     y_upp<-SP_v_FOI$Upper
     
     Seropositive_by_age <- data.frame(Age = age, Serop_count = prop.seropos, Serop_model = y, Serop_model_low = y_low, Serop_model_upp = y_upp)
-    write.csv(Seropositive_by_age, paste("Cat_", sim, "_Seropositive_by_age_VARIABLE_FOI.csv", sep=""))
+    write.csv(Seropositive_by_age, paste("model_output/catalytic/Cat_", sim, "_Seropositive_by_age_VARIABLE_FOI.csv", sep=""))
     
     seroplot2 <- ggplot(Seropositive_by_age, aes(x=Age, y=Serop_model)) +
       geom_line(col = "black") +
@@ -97,7 +97,7 @@
       coord_cartesian(ylim=0:1) +
       scale_x_continuous(breaks=min(age):max(age))
     seroplot2
-    ggsave(filename = paste("Cat_", sim, "_Seroprevalence_variable_FOI.png", sep=""), plot = seroplot2)
+    ggsave(filename = paste("model_output/catalytic/Cat_", sim, "_Seroprevalence_variable_FOI.png", sep=""), plot = seroplot2)
     
     
     

@@ -14,7 +14,7 @@ mu_plot <- ggplot(z_and_a, aes(x=a, y=z)) + geom_point(col="grey") +
         plot.title = element_text(hjust = 0.5, size=15), panel.border = element_rect(colour = "black", fill = NA), panel.background = element_rect(fill = NA)) +
   scale_x_continuous(breaks=agemin:agemax)
 mu_plot
-ggsave(filename = paste("Mix_",sim_num, "_spline.png", sep=""), plot = mu_plot)
+ggsave(filename = paste("model_output/mixture/Mix_",sim_num, "_spline.png", sep=""), plot = mu_plot)
 
 
 #seroprevalence
@@ -26,11 +26,11 @@ sero_plot <- ggplot(seroprevalence, aes(x = Age, y = pi_a)) +
   coord_cartesian(ylim=0:1) +
   scale_x_continuous(breaks=agemin:agemax)
 sero_plot
-ggsave(filename = paste("Mix_",sim_num, "_Seroprevalence.png", sep=""), plot = sero_plot)
+ggsave(filename = paste("model_output/mixture/Mix_",sim_num, "_Seroprevalence.png", sep=""), plot = sero_plot)
 
 
 #save table of seroprevalence
-write.csv(seroprevalence, file=paste("Mix_",sim_num, "_Seroprevalence_by_age", ".csv", sep=""))
+write.csv(seroprevalence, file=paste("model_output/mixture/Mix_",sim_num, "_Seroprevalence_by_age", ".csv", sep=""))
 
 
 #FOI
@@ -43,9 +43,9 @@ FOI_plot <- ggplot(FOI_values, aes(x = Age, y = FOI)) +
   scale_x_continuous(breaks=agemin:(agemax-1))
 
 FOI_plot
-ggsave(filename = paste("Mix_",sim_num, "_FOI.png", sep=""), plot = FOI_plot)
+ggsave(filename = paste("model_output/mixture/Mix_",sim_num, "_FOI.png", sep=""), plot = FOI_plot)
 
-write.csv(FOI_values, file=paste("Mix_",sim_num, "_FOI_by_age", ".csv", sep=""))
+write.csv(FOI_values, file=paste("model_output/mixture/Mix_",sim_num, "_FOI_by_age", ".csv", sep=""))
 
 
 #save table of parameters

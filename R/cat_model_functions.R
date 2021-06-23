@@ -4,8 +4,6 @@
 
 
 ### data processing
-        library(epitools)
-        
         data_processing <- function(data){
           
           # new dataframe for proportions seropositive by age

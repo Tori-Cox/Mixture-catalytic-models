@@ -3,12 +3,9 @@
 ## 1. Mixture model ###########################
 ###############################################
 
-## load packages
-library(ggplot2)
-library(scales)
 
 ## read in data
-est <- read.csv("Mix_fit_and_est_params.csv") #estimated by mixture model
+est <- read.csv("model_output/mixture/Mix_fit_and_est_params.csv") #estimated by mixture model
 true<- read.csv("MixtureSimParams.csv") #simulated 'true' parameters
 true_foi <- true$foi
 true_serop <- true$seroprev
@@ -43,14 +40,7 @@ true_serop <- true$seroprev
           newdata$bias[i]<-newdata$Est[i]-newdata$True[i]
         }
         
-        
-        newdata2<-newdata[newdata$Parameter=="Seroprevalence",]
-        sum(newdata2$within)/200
-        newdata2<-newdata[newdata$Parameter=="FOI",]
-        sum(newdata2$within)/200
-        
-        
-        ggplot(newdata) + facet_wrap("Parameter", scales="free")+
+        mix_plot <- ggplot(newdata) + facet_wrap("Parameter", scales="free")+
           geom_point(aes(x=True, y=Est, col=within), size=2, alpha=0.4) +
           geom_errorbar(aes(x=True, ymin=Est_low, ymax=Est_upp, col=within), alpha=0.4)+
           theme_bw() +
@@ -58,6 +48,8 @@ true_serop <- true$seroprev
           geom_abline(slope=1, linetype="dashed", size=1) +
           theme(axis.text = element_text(size=15), axis.title = element_text(size=20),
                 strip.text = element_text(size=15), legend.position = "none")
+        
+        #ggsave(plot = mix_plot, filename = "Mix_results_sp_foi_est_vs_true.png")
         
         MIXDATA <- newdata
         saveRDS(MIXDATA, "results_MIXDATA.RDS")
@@ -101,19 +93,24 @@ true_serop <- true$seroprev
           }
           
         }
-        sum(data$matchdist0)
-        sum(data$matchdist1)
-        sum(data$matchdistboth)
-        sum(data$matchdistneither)
-        
+       x<-  sum(data$matchdist0)
+       y<-  sum(data$matchdist1)
+       z<-  sum(data$matchdistboth)
+       w<- sum(data$matchdistneither)
+       dist_vect <- c(x,y,z,w) 
+       
+       results <- data.frame(Dist = c("Correct dist0", "Correct dist1",
+                                      "Both dist correct", "Neither dist correct"),
+                             Numb_correct = dist_vect, Perc = dist_vect/200)
+       write.csv(results, "Mix_results_dist_perc_correct.csv")
+       
         
         
    ## distribution parameter specification by mixture model
 
       data<-merge(true,est[,-1], by="sim")
       data$within <- 0
-      data$mudiff<- data$mu1_true-data$mu0_true
-
+      
       dataFOI <- data[, c(1,4,28:31)]
       dataFOI$Parameter <- "FOI"
       colnames(dataFOI)[2:5] <- c("True", "Est", "low", "upp") 
@@ -168,17 +165,24 @@ true_serop <- true$seroprev
         }
         }
 
-      sum(dataFOI$within)/200
-      sum(dataseroprev$within)/200
-      sum(datasd1$within)/200
-      sum(datasd0$within)/200
-      sum(datamu1$within)/200
-      sum(datamu0$within)/200
+      x<- sum(dataFOI$within)
+      y<-sum(dataseroprev$within)
+      z<-sum(datasd1$within)
+      w<-sum(datasd0$within)
+      v<-sum(datamu1$within)
+      u<-sum(datamu0$within)
+      
+      param_vect <- c(x,y,z,w, v, u) 
+      
+      results <- data.frame(Param = c("FOI", "SP","sd1", "sd0", "mu1", "mu0"),
+                            Numb_correct = param_vect, Perc = param_vect/200)
+      write.csv(results, "Mix_results_param_perc_correct.csv")
+      
       
       
       newdata <- rbind(datasd1, datasd0, datamu1, datamu0, dataseroprev, dataFOI)
       newdata$within <- as.character(newdata$within)
-      ggplot(newdata) + facet_wrap("Parameter", scales="free")+
+      mix_plot2 <- ggplot(newdata) + facet_wrap("Parameter", scales="free")+
         geom_point(aes(x=True, y=Est, col=within), size=3, alpha=0.4) +
         geom_errorbar(aes(x=True, ymin=low, ymax=upp, col=within), alpha=0.4)+
         theme_bw() +
@@ -188,3 +192,6 @@ true_serop <- true$seroprev
               strip.text = element_text(size=15), legend.position = "none") +
         scale_y_continuous(breaks = scales::pretty_breaks(7), limits = c(0, NA)) +
         scale_x_continuous(breaks = scales::pretty_breaks(7), limits = c(NA, NA)) 
+
+      ggsave(plot = mix_plot2, filename = "Mix_results_param_est_vs_true.png")
+      

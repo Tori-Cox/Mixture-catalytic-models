@@ -194,7 +194,7 @@ if(dist0=="gamma" & dist1=="norm"){
     labs(y="Antibody titer count", x=paste("Antibody titer  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
 }
 
-ggsave(filename = paste("mix_fit_", sim_num, ".png", sep=""))
+ggsave(filename = paste("model_output/mixture/mix_fit_", sim_num, ".png", sep=""))
 
 
 
