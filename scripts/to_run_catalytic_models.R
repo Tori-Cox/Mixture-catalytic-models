@@ -28,11 +28,11 @@ for(sim in 1:200){
   ## model fitting 
   
         # fit initial models without CIs to check values    
-        fit.c<-fit.data(data=loc.all, npar=1) ## npar= number of parameters to fit. Use 1 for a time constant model.
-        fit.c$par #age invariant FOI estimate
+        #fit.c<-fit.data(data=loc.all, npar=1) ## npar= number of parameters to fit. Use 1 for a time constant model.
+        #fit.c$par #age invariant FOI estimate
         
-        fit.v<-fit.data(data=loc.all, npar=nages)
-        mean(fit.v$par) #mean of age specific FOI
+        #fit.v<-fit.data(data=loc.all, npar=nages)
+        #mean(fit.v$par) #mean of age specific FOI
         
   # fit the models with CIs
   fit.c_CI <- fit.data.cis(B=500, data=loc.all, original=original, npar=1)

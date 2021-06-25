@@ -33,7 +33,7 @@ source("scripts/to_run_catalytic_models.R")
 ## to run the mixture model
 source("R/mix_fitting_functions.R")
 source("R/mix_calc_functions.R")
-source("R/to_run_mixture_model.R") # N.B. likely will have to manually run through this script
+source("scripts/to_run_mixture_model.R") # N.B. likely will have to manually run through this script
                                    # (loop may throw error when trying to fit distributions to some 
                                    # of the data sets)
 
