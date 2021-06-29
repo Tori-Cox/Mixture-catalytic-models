@@ -21,18 +21,13 @@
     data <- readRDS("MixtureSims.rds")
     
 ## loop
-    # N.B may have to manually run iterations if distributions cannot be fit (will throw error and stop loop)
     for(sim_num in 1:200){
-     # sim_num<-1
-      
+     
     data_sub <- data[[sim_num]]
     z<-data_sub$seroval 
     breaks = 50
     mixdat <- mixgroup(z, breaks) # functions from mixdist package to group data
     mixpar <- mixparam(pi=c(0.5, 0.5), mu = c(0.5,3), sigma = c(1, 1))
-    
-    
-    # fit the different distributions 
     constr = list(conpi = "NONE", conmu = "NONE", consigma = "NONE", 
                   fixpi = NULL, fixmu = NULL, fixsigma = NULL, cov = NULL, size = NULL)
     
@@ -55,23 +50,51 @@
     norm_gamma <- list()
     norm_gamma$chisq <- NA
     
-    # 1.2 limit from weibull par calculation (ref. Garcia, O.  NZ Journal of Forestry Science)
-    if((mixpar$sigma[1] / mixpar$mu[1] < 1.2) & (mixpar$sigma[2] / mixpar$mu[2] < 1.2)){
+    tryCatch({
       weibull_weibull <- mix(mixdat, mixpar,  dist1="weibull",  dist2="weibull", emsteps = 1,  exptol = 5e-06, constr=constr)
-    }
-    if(mixpar$sigma[1] / mixpar$mu[1] < 1.2){
+      }, error=function(e){
+        print(paste("Unable to fit WW mixture distribution to Sim", sim_num, sep=' '))
+      })
+    tryCatch({
       weibull_norm <- mix(mixdat, mixpar, dist1="weibull", dist2="norm", emsteps = 1,  exptol = 5e-06, constr=constr)
+    }, error=function(e){
+      print(paste("Unable to fit WN mixture distribution to Sim", sim_num, sep=' '))
+    })
+    tryCatch({
       weibull_gamma <- mix(mixdat, mixpar,  dist1="weibull",  dist2="gamma", emsteps = 1,  exptol = 5e-06, constr=constr)
-    }
-    if(mixpar$sigma[2] / mixpar$mu[2] < 1.2){
+    }, error=function(e){
+      print(paste("Unable to fit WG mixture distribution to Sim", sim_num, sep=' '))
+    })
+    tryCatch({
       norm_weibull <- mix(mixdat, mixpar,  dist1="norm",  dist2="weibull",emsteps = 1,  exptol = 5e-06, constr=constr)
+    }, error=function(e){
+      print(paste("Unable to fit NW mixture distribution to Sim", sim_num, sep=' '))
+    })
+    tryCatch({
       gamma_weibull <- mix(mixdat, mixpar,  dist1="gamma",  dist2="weibull", emsteps = 1,  exptol = 5e-06, constr=constr)
-    }
+    }, error=function(e){
+      print(paste("Unable to fit GW mixture distribution to Sim", sim_num, sep=' '))
+    })
+    tryCatch({
     norm_norm <- mix(mixdat, mixpar,  dist1="norm",  dist2="norm", emsteps = 1,  exptol = 5e-06, constr=constr)
-    norm_gamma <- mix(mixdat, mixpar,  dist1="norm",  dist2="gamma", emsteps = 1,  exptol = 5e-06, constr=constr)
-    gamma_norm <- mix(mixdat, mixpar,  dist1="gamma",  dist2="norm", emsteps = 1,  exptol = 5e-06, constr=constr)
-    gamma_gamma <- mix(mixdat, mixpar,  dist1="gamma",  dist2="gamma",emsteps = 1,  exptol = 5e-06, constr=constr)
-    
+    }, error=function(e){
+      print(paste("Unable to fit NN mixture distribution to Sim", sim_num, sep=' '))
+    })
+    tryCatch({
+      norm_gamma <- mix(mixdat, mixpar,  dist1="norm",  dist2="gamma", emsteps = 1,  exptol = 5e-06, constr=constr)
+    }, error=function(e){
+      print(paste("Unable to fit NG mixture distribution to Sim", sim_num, sep=' '))
+    })
+    tryCatch({
+      gamma_norm <- mix(mixdat, mixpar,  dist1="gamma",  dist2="norm", emsteps = 1,  exptol = 5e-06, constr=constr)
+    }, error=function(e){
+      print(paste("Unable to fit GN mixture distribution to Sim", sim_num, sep=' '))
+    })
+    tryCatch({
+      gamma_gamma <- mix(mixdat, mixpar,  dist1="gamma",  dist2="gamma",emsteps = 1,  exptol = 5e-06, constr=constr)
+    }, error=function(e){
+      print(paste("Unable to fit GG mixture distribution to Sim", sim_num, sep=' '))
+    })
 
     #choosing optimal distribution pair based on chisq
     df <- data.frame(Chisq <- c(weibull_norm$chisq, weibull_gamma$chisq, weibull_weibull$chisq,
