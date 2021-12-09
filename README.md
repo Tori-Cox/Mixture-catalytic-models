@@ -17,7 +17,7 @@ All analyses can be run from the main.R file, which calls scripts to run the ana
 ### Scripts
 #### _simulate_data.R_
   
-Simulate 200 serological datasets - each dataset is a linelist of individuals with age and simulated antibody titre level.
+Simulate 540 serological datasets - each dataset is a linelist of individuals with age and simulated antibody titre level.
   
 #### _simulated_data_thresholds.R_
   
