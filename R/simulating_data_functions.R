@@ -1,6 +1,6 @@
 ########################################################################################
 ## Functions for simulating data and estimating serostatus using optimised thresholds ##
-#######################################################################################
+########################################################################################
 
 
 ## simulate function
@@ -11,10 +11,6 @@ simulate <- function(age, Nsims){
   status <- vector()
   
   for(j in 1:Nsims){
-    
-    pars$dist0[j] <- dists[runif(1,1,4)]
-    pars$dist1[j] <- dists[runif(1,1,4)]
-    
     
     for(i in 1:length(age)){
       
@@ -51,12 +47,12 @@ est_serostatus <-function(new_data, par){
         new_data$sero[i] <- 1
       }
       if(new_data$seroval[i] > par[1] & new_data$seroval[i] < par[2]){
-        new_data$sero[i] <- "Equivical"
+        new_data$sero[i] <- "Equivocal"
       }
       
-      ifelse(new_data$sero[i]==new_data$status[i], new_data$match[i]<-0, new_data$match[i]<-1)
+      ifelse(new_data$sero[i]==new_data$status[i], new_data$match[i]<-1, new_data$match[i]<-0)
     }
     sum<-sum(new_data$match)
-  }else{sum<-Inf}
-  return(sum)
+  }else{sum<- 0}
+  return(sum*-1) # for minimisation
 }

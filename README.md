@@ -45,7 +45,7 @@ Code to generate and save .csv files of the seroprevalence and FOI estimates, an
 
 #### _explore_results_1.R_
 
-Mixture model results. Assess the ability of the mixture model to correctly assign the distribution family (Weibull, normal, gamma) to the seronegative and seropositive compartments of the simulated datasets. Compare and plot the estimated mean titre scores, distribution standard deviations and the FOI to the 'true' simulated values. Further, calculate uncertainty and bias in the FOI and seroprevalence estimates.  
+Mixture model results. Assess the ability of the mixture model to correctly assign the distribution family to the seronegative and seropositive compartments of the simulated datasets. Compare and plot the estimated mean titre scores, distribution standard deviations and the FOI to the 'true' simulated values. Further, calculate uncertainty and bias in the FOI and seroprevalence estimates.  
 
 #### _explore_results_2.R_
 

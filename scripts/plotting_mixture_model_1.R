@@ -9,6 +9,9 @@ binwidth <-  abs(mixfit$mixdata$X[2] - mixfit$mixdata$X[1])
 dist0 <- mixfit$distribution[[1]]
 dist1	<- mixfit$distribution[[2]]
 
+thresholds <- readRDS("MixtureSims_thresholds.RDS")
+thresholds <- thresholds[[sim_num]]
+
 ## norm norm
 if(dist0=="norm" & dist1=="norm"){    
   ggplot() + 
@@ -25,7 +28,8 @@ if(dist0=="norm" & dist1=="norm"){
     
     
     geom_vline(aes(xintercept = mixfit$parameters$mu), colour = "red", linetype ="longdash", size = .8) +
-    labs(y="Antibody titer count", x=paste("Antibody titer  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
+    geom_vline(aes(xintercept = thresholds), colour = "black", linetype ="dashed", size = .8) +
+    labs(y="Antibody titer count", x=paste("Log(antibody titre + 1)  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
 }
 
 # norm gamma
@@ -45,7 +49,8 @@ if(dist0=="norm" & dist1=="gamma"){
     
     
     geom_vline(aes(xintercept = mixfit$parameters$mu), colour = "red", linetype ="longdash", size = .8) +
-    labs(y="Antibody titer count", x=paste("Antibody titer  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
+    geom_vline(aes(xintercept = thresholds), colour = "black", linetype ="dashed", size = .8) +
+    labs(y="Antibody titer count", x=paste("Log(antibody titre + 1)  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
 }
 # norm weibull
 if(dist0=="norm" & dist1=="weibull"){    
@@ -65,7 +70,8 @@ if(dist0=="norm" & dist1=="weibull"){
     
     
     geom_vline(aes(xintercept = mixfit$parameters$mu), colour = "red", linetype ="longdash", size = .8) +
-    labs(y="Antibody titer count", x=paste("Antibody titer  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
+    geom_vline(aes(xintercept = thresholds), colour = "black", linetype ="dashed", size = .8) +
+    labs(y="Antibody titer count", x=paste("Log(antibody titre + 1)  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
 }
 #  weibull norm
 if(dist0=="weibull" & dist1=="norm"){    
@@ -86,7 +92,8 @@ if(dist0=="weibull" & dist1=="norm"){
     
     
     geom_vline(aes(xintercept = mixfit$parameters$mu), colour = "red", linetype ="longdash", size = .8) +
-    labs(y="Antibody titer count", x=paste("Antibody titer  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
+    geom_vline(aes(xintercept = thresholds), colour = "black", linetype ="dashed", size = .8) +
+    labs(y="Antibody titer count", x=paste("Log(antibody titre + 1)  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
 }
 #  weibull gamma
 if(dist0=="weibull" & dist1=="gamma"){    
@@ -108,7 +115,8 @@ if(dist0=="weibull" & dist1=="gamma"){
     
     
     geom_vline(aes(xintercept = mixfit$parameters$mu), colour = "red", linetype ="longdash", size = .8) +
-    labs(y="Antibody titer count", x=paste("Antibody titer  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
+    geom_vline(aes(xintercept = thresholds), colour = "black", linetype ="dashed", size = .8) +
+    labs(y="Antibody titer count", x=paste("Log(antibody titre + 1)  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
 }
 # weibull weibull
 if(dist0=="weibull" & dist1=="weibull"){    
@@ -130,7 +138,8 @@ if(dist0=="weibull" & dist1=="weibull"){
     
     
     geom_vline(aes(xintercept = mixfit$parameters$mu), colour = "red", linetype ="longdash", size = .8) +
-    labs(y="Antibody titer count", x=paste("Antibody titer  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
+    geom_vline(aes(xintercept = thresholds), colour = "black", linetype ="dashed", size = .8) +
+    labs(y="Antibody titer count", x=paste("Log(antibody titre + 1)  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
   
 }
 # gamma gamma
@@ -151,7 +160,8 @@ if(dist0=="gamma" & dist1=="gamma"){
     
     
     geom_vline(aes(xintercept = mixfit$parameters$mu), colour = "red", linetype ="longdash", size = .8) +
-    labs(y="Antibody titer count", x=paste("Antibody titer  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
+    geom_vline(aes(xintercept = thresholds), colour = "black", linetype ="dashed", size = .8) +
+    labs(y="Antibody titer count", x=paste("Log(antibody titre + 1)  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
 }
 # gamma weibull
 if(dist0=="gamma" & dist1=="weibull"){    
@@ -172,7 +182,8 @@ if(dist0=="gamma" & dist1=="weibull"){
     
     
     geom_vline(aes(xintercept = mixfit$parameters$mu), colour = "red", linetype ="longdash", size = .8) +
-    labs(y="Antibody titer count", x=paste("Antibody titer  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
+    geom_vline(aes(xintercept = thresholds), colour = "black", linetype ="dashed", size = .8) +
+    labs(y="Antibody titer count", x=paste("Log(antibody titre + 1)  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
 }
 # gamma norm 
 if(dist0=="gamma" & dist1=="norm"){    
@@ -191,7 +202,8 @@ if(dist0=="gamma" & dist1=="norm"){
     
     
     geom_vline(aes(xintercept = mixfit$parameters$mu), colour = "red", linetype ="longdash", size = .8) +
-    labs(y="Antibody titer count", x=paste("Antibody titer  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
+    geom_vline(aes(xintercept = thresholds), colour = "black", linetype ="dashed", size = .8) +
+    labs(y="Antibody titer count", x=paste("Log(antibody titre + 1)  \n seronegative distribution = ", dist0, "\n seropositive distribution = ", dist1, sep=""))
 }
 
 ggsave(filename = paste("model_output/mixture/mix_fit_", sim_num, ".png", sep=""))
@@ -218,4 +230,7 @@ stored_params$mu1_upp[sim_num]	<- mixfit$parameters$mu[2] + 1.96*mixfit$se$mu.se
 stored_params$sd0_upp[sim_num]	<- mixfit$parameters$sigma[1] + 1.96*mixfit$se$sigma.se[1]
 stored_params$sd1_upp[sim_num]	<- mixfit$parameters$sigma[2] + 1.96*mixfit$se$sigma.se[2]
 
-
+stored_params$chisq[sim_num] <- mixfit$chisq
+stored_params$p[sim_num] <- mixfit$P
+stored_params$AIC[sim_num] <- mixfit$AIC
+stored_params$df[sim_num] <- mixfit$df

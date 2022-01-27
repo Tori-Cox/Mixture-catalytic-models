@@ -18,102 +18,284 @@
       newdata3<-subset(newdata, newdata$model!="Time-varying catalytic model")
       
       
-
-###################################
-## plots of bias and uncertainty ##
-###################################
+#######################################
+## plot comparing est vs true values ##
+#######################################
+      to_remove<-readRDS("MixtureSims_sim_remove.RDS")
+      newdata <- rbind(CATCDATA[! substring(CATCDATA$sim, 5,8) %in% to_remove$sim,],
+                       CATVDATA[! substring(CATVDATA$sim, 5,8) %in% to_remove$sim,],MIXDATA)
+      newdata2<-subset(newdata, newdata$model!="Time-constant catalytic model")
+      newdata3<-subset(newdata, newdata$model!="Time-varying catalytic model")
+      
+      newdata2<-newdata2[newdata2$Est<=1, ]
+      newdata3<-newdata3[newdata3$Est<=1, ]
+      newdata2<-newdata2[is.na(newdata2$Est)==F, ]
+      newdata3<-newdata3[is.na(newdata3$Est)==F, ]
+      
       
       ## plot comparing estimated versus true FOI and seroprevalence values
       #time varying catalytic model
-      a<- ggplot(newdata2) + facet_wrap("Parameter", scales="free")+
-        geom_errorbar(aes(x=True, ymin=Est_low, ymax=Est_upp, col=model), alpha=0.6)+
-        geom_point(aes(x=True, y=Est, col=model), size=1.5, alpha=0.4) +
-        theme_bw() +
+      a<- 
+        ggscatter(newdata2, x = "True", y = "Est",
+                  add = "reg.line",                         
+                  color = "model", size=1.5, alpha=0.7)+
+        stat_cor(aes(color = model,label = ..r.label..), label.y= c(0.85,0.95)) +
+        facet_wrap("Parameter", scales="free")+
+        geom_errorbar(aes(x=True, ymin=Est_low, ymax=Est_upp, col=model), alpha=0.4)+
+        theme_bw()+
         labs(x="True values", y="Estimated values", col=NULL) +
         geom_abline(slope=1, linetype="dashed", size=1) +
-        theme(axis.text = element_text(size=15),
-              axis.title = element_text(size=16),
+        coord_cartesian(ylim=c(0,1))+
+        theme(axis.text = element_text(size=14),
+              axis.title = element_text(size=15),
               legend.text=element_text(size=14),
               strip.text = element_text(size=15),
-              legend.position = c(0.2,0.85))
-      #time constant catalytic model
-      b<-ggplot(newdata3) + facet_wrap("Parameter", scales="free")+
-        geom_errorbar(aes(x=True, ymin=Est_low, ymax=Est_upp, col=model), alpha=0.6)+
-        geom_point(aes(x=True, y=Est, col=model), size=1.5, alpha=0.4) +
-        theme_bw() +
-        labs(x=NULL, y="Estimated values", col=NULL) +
-        geom_abline(slope=1, linetype="dashed", size=1) +
-        theme(axis.text = element_text(size=15),
-              axis.title = element_text(size=16),
-              legend.text=element_text(size=14),
-              strip.text = element_text(size=15),
-              legend.position = c(0.2,0.85))
+              legend.position = "bottom")+
+        scale_color_manual(breaks = c("Mixture model",
+                                      "Time-varying catalytic model"),
+                           values=c("#F8766D","#00BFC4" ))+
+        guides(color = guide_legend(override.aes = list(size=3,linetype=0)))
       
+      
+      #time constant catalytic model
+      b<-
+        ggscatter(newdata3, x = "True", y = "Est",
+                  add = "reg.line",                         
+                  color = "model", size=1.5, alpha=0.7)+
+        stat_cor(aes(color = model,label = ..r.label..), label.y= c(0.85,0.95)) +
+        facet_wrap("Parameter", scales="free")+
+        geom_errorbar(aes(x=True, ymin=Est_low, ymax=Est_upp, col=model), alpha=0.4)+
+        theme_bw()+
+        labs(x="True values", y="Estimated values", col=NULL) +
+        geom_abline(slope=1, linetype="dashed", size=1) +
+        coord_cartesian(ylim=c(0,1))+
+        theme(axis.text = element_text(size=14),
+              axis.title = element_text(size=15),
+              legend.text=element_text(size=14),
+              strip.text = element_text(size=15),
+              legend.position = "bottom")+
+        scale_color_manual(breaks = c("Mixture model",
+                                      "Time-constant catalytic model"),
+                           values=c("#F8766D","#00BA38"))+
+        guides(color = guide_legend(override.aes = list(size=3,linetype=0)))
       
       png(filename = "Comp_results_est_vs_true.png")
       z <- grid.arrange(b,a)
       dev.off()
       
+###################################
+## plots of bias and uncertainty ##
+###################################
       
-      ## bias and uncertainty plot
-      p1<-ggplot(newdata) + facet_wrap("Parameter", scales="free")+
-        geom_freqpoly(aes(x=uncertainty,col=model),size=1) +
+      summary_stats<- data.frame(Parameter = rep(c("FOI", "Seroprevalence"), each = 9),
+                                 Model = rep(c("Mixture model", 
+                                               "Time-constant Catalytic model",
+                                               "Time-varying Catalytic model"), times=3),
+                                 Stat = rep(c("Bias", "Uncertainty", "Coverage"), each=3),
+                                 Mean=NA, 
+                                 Low=NA,Upp=NA, 
+                                 Count=NA)
+      CATCDATA2 <- CATCDATA[! substring(CATCDATA$sim, 5,8) %in% to_remove$sim,]
+      CATVDATA2 <- CATVDATA[! substring(CATVDATA$sim, 5,8) %in% to_remove$sim,]
+      MIXDATA2 <- MIXDATA[! MIXDATA$sim %in% to_remove$sim,]
+      
+      
+      summary_stats$Count[summary_stats$Parameter=="FOI" & 
+                            summary_stats$Model=="Mixture model" &
+                            summary_stats$Stat=="Coverage"] <-  
+        sum(MIXDATA2$within[MIXDATA2$Parameter=="FOI"])
+      summary_stats$Count[summary_stats$Parameter=="FOI" & 
+                            summary_stats$Model=="Time-constant Catalytic model" &
+                            summary_stats$Stat=="Coverage"] <-  
+        sum(CATCDATA2$within[CATCDATA2$Parameter=="FOI"])
+      summary_stats$Count[summary_stats$Parameter=="FOI" & 
+                            summary_stats$Model=="Time-varying Catalytic model" &
+                            summary_stats$Stat=="Coverage"] <-  
+        sum(CATVDATA2$within[CATVDATA2$Parameter=="FOI"])
+      summary_stats$Count[summary_stats$Parameter!="FOI" & 
+                            summary_stats$Model=="Mixture model" &
+                            summary_stats$Stat=="Coverage"] <-  
+        sum(MIXDATA2$within[MIXDATA2$Parameter!="FOI"])
+      summary_stats$Count[summary_stats$Parameter!="FOI" & 
+                            summary_stats$Model=="Time-constant Catalytic model" &
+                            summary_stats$Stat=="Coverage"] <-  
+        sum(CATCDATA2$within[CATCDATA2$Parameter!="FOI"])
+      summary_stats$Count[summary_stats$Parameter!="FOI" & 
+                            summary_stats$Model=="Time-varying Catalytic model" &
+                            summary_stats$Stat=="Coverage"] <-  
+        sum(CATVDATA2$within[CATVDATA2$Parameter!="FOI"])
+      
+      
+      summary_stats$Mean[summary_stats$Parameter=="FOI" & 
+                           summary_stats$Model=="Mixture model" &
+                           summary_stats$Stat=="Uncertainty"] <-  
+        mean(MIXDATA2$uncertainty[MIXDATA2$Parameter=="FOI"],na.rm=T)
+      summary_stats$Mean[summary_stats$Parameter=="FOI" & 
+                           summary_stats$Model=="Time-constant Catalytic model" &
+                           summary_stats$Stat=="Uncertainty"] <-  
+        mean(CATCDATA2$uncertainty[CATCDATA2$Parameter=="FOI"],na.rm=T) 
+      summary_stats$Mean[summary_stats$Parameter=="FOI" & 
+                           summary_stats$Model=="Time-varying Catalytic model" &
+                           summary_stats$Stat=="Uncertainty"] <-  
+        mean(CATVDATA2$uncertainty[CATVDATA2$Parameter=="FOI"],na.rm=T) 
+      summary_stats$Mean[summary_stats$Parameter!="FOI" & 
+                           summary_stats$Model=="Mixture model" &
+                           summary_stats$Stat=="Uncertainty"] <-  
+        mean(MIXDATA2$uncertainty[MIXDATA2$Parameter!="FOI"],na.rm=T) 
+      summary_stats$Mean[summary_stats$Parameter!="FOI" & 
+                           summary_stats$Model=="Time-constant Catalytic model" &
+                           summary_stats$Stat=="Uncertainty"] <-  
+        mean(CATCDATA2$uncertainty[CATCDATA2$Parameter!="FOI"],na.rm=T) 
+      summary_stats$Mean[summary_stats$Parameter!="FOI" & 
+                           summary_stats$Model=="Time-varying Catalytic model" &
+                           summary_stats$Stat=="Uncertainty"] <-  
+        mean(CATVDATA2$uncertainty[CATVDATA2$Parameter!="FOI"],na.rm=T) 
+      
+      
+      summary_stats$Mean[summary_stats$Parameter=="FOI" & 
+                           summary_stats$Model=="Mixture model" &
+                           summary_stats$Stat=="Bias"] <-  
+        mean(MIXDATA2$bias[MIXDATA2$Parameter=="FOI"],na.rm=T)
+      summary_stats$Mean[summary_stats$Parameter=="FOI" & 
+                           summary_stats$Model=="Time-constant Catalytic model" &
+                           summary_stats$Stat=="Bias"] <-  
+        mean(CATCDATA2$bias[CATCDATA2$Parameter=="FOI"],na.rm=T) 
+      summary_stats$Mean[summary_stats$Parameter=="FOI" & 
+                           summary_stats$Model=="Time-varying Catalytic model" &
+                           summary_stats$Stat=="Bias"] <-  
+        mean(CATVDATA2$bias[CATVDATA2$Parameter=="FOI"],na.rm=T) 
+      summary_stats$Mean[summary_stats$Parameter!="FOI" & 
+                           summary_stats$Model=="Mixture model" &
+                           summary_stats$Stat=="Bias"] <-  
+        mean(MIXDATA2$bias[MIXDATA2$Parameter!="FOI"],na.rm=T) 
+      summary_stats$Mean[summary_stats$Parameter!="FOI" & 
+                           summary_stats$Model=="Time-constant Catalytic model" &
+                           summary_stats$Stat=="Bias"] <-  
+        mean(CATCDATA2$bias[CATCDATA2$Parameter!="FOI"],na.rm=T) 
+      summary_stats$Mean[summary_stats$Parameter!="FOI" & 
+                           summary_stats$Model=="Time-varying Catalytic model" &
+                           summary_stats$Stat=="Bias"] <-  
+        mean(CATVDATA2$bias[CATVDATA2$Parameter!="FOI"],na.rm=T) 
+      
+      
+      summary_stats[summary_stats$Parameter=="FOI" & 
+                      summary_stats$Model=="Mixture model" &
+                      summary_stats$Stat=="Bias",][,c(5:6)] <-  
+        quantile((MIXDATA2[MIXDATA2$Parameter=="FOI",]$bias), probs=c(0.025,0.975), na.rm=T)
+      summary_stats[summary_stats$Parameter=="FOI" & 
+                      summary_stats$Model=="Time-constant Catalytic model" &
+                      summary_stats$Stat=="Bias",][,c(5:6)] <-
+        quantile((CATCDATA2[CATCDATA2$Parameter=="FOI",]$bias), probs=c(0.025,0.975), na.rm=T)
+      summary_stats[summary_stats$Parameter=="FOI" & 
+                      summary_stats$Model=="Time-varying Catalytic model" &
+                      summary_stats$Stat=="Bias",][,c(5:6)] <-
+        quantile((CATVDATA2[CATVDATA2$Parameter=="FOI",]$bias), probs=c(0.025,0.975), na.rm=T)
+      summary_stats[summary_stats$Parameter!="FOI" & 
+                      summary_stats$Model=="Mixture model" &
+                      summary_stats$Stat=="Bias",][,c(5:6)] <-  
+        quantile((MIXDATA2[MIXDATA2$Parameter!="FOI",]$bias), probs=c(0.025,0.975), na.rm=T)
+      summary_stats[summary_stats$Parameter!="FOI" & 
+                      summary_stats$Model=="Time-constant Catalytic model" &
+                      summary_stats$Stat=="Bias",][,c(5:6)] <-
+        quantile((CATCDATA2[CATCDATA2$Parameter!="FOI",]$bias), probs=c(0.025,0.975), na.rm=T)
+      summary_stats[summary_stats$Parameter!="FOI" & 
+                      summary_stats$Model=="Time-varying Catalytic model" &
+                      summary_stats$Stat=="Bias",][,c(5:6)] <-
+        quantile((CATVDATA2[CATVDATA2$Parameter!="FOI",]$bias), probs=c(0.025,0.975), na.rm=T)
+      
+      summary_stats[summary_stats$Parameter=="FOI" & 
+                      summary_stats$Model=="Mixture model" &
+                      summary_stats$Stat=="Uncertainty",][,c(5:6)] <-  
+        quantile((MIXDATA2[MIXDATA2$Parameter=="FOI",]$uncertainty), probs=c(0.025,0.975), na.rm=T)
+      summary_stats[summary_stats$Parameter=="FOI" & 
+                      summary_stats$Model=="Time-constant Catalytic model" &
+                      summary_stats$Stat=="Uncertainty",][,c(5:6)] <-
+        quantile((CATCDATA2[CATCDATA2$Parameter=="FOI",]$uncertainty), probs=c(0.025,0.975), na.rm=T)
+      summary_stats[summary_stats$Parameter=="FOI" & 
+                      summary_stats$Model=="Time-varying Catalytic model" &
+                      summary_stats$Stat=="Uncertainty",][,c(5:6)] <-
+        quantile((CATVDATA2[CATVDATA2$Parameter=="FOI",]$uncertainty), probs=c(0.025,0.975), na.rm=T)
+      summary_stats[summary_stats$Parameter!="FOI" & 
+                      summary_stats$Model=="Mixture model" &
+                      summary_stats$Stat=="Uncertainty",][,c(5:6)] <-  
+        quantile((MIXDATA2[MIXDATA2$Parameter!="FOI",]$uncertainty), probs=c(0.025,0.975), na.rm=T)
+      summary_stats[summary_stats$Parameter!="FOI" & 
+                      summary_stats$Model=="Time-constant Catalytic model" &
+                      summary_stats$Stat=="Uncertainty",][,c(5:6)] <-
+        quantile((CATCDATA2[CATCDATA2$Parameter!="FOI",]$uncertainty), probs=c(0.025,0.975), na.rm=T)
+      summary_stats[summary_stats$Parameter!="FOI" & 
+                      summary_stats$Model=="Time-varying Catalytic model" &
+                      summary_stats$Stat=="Uncertainty",][,c(5:6)] <-
+        quantile((CATVDATA2[CATVDATA2$Parameter!="FOI",]$uncertainty), probs=c(0.025,0.975), na.rm=T)
+      
+      
+      summary_stats$Model <- factor(summary_stats$Model, 
+                                    levels=c("Mixture model", 
+                                             "Time-constant Catalytic model", 
+                                             "Time-varying Catalytic model"))
+      summary_stats_cov<-summary_stats[summary_stats$Stat=="Coverage",]
+      for(i in 1:6){
+        summary_stats_cov$Upp[i] <- (binom.exact(summary_stats_cov$Count[i], 509, conf.level = .95)$upper) *100
+        summary_stats_cov$Low[i] <- (binom.exact(summary_stats_cov$Count[i], 509, conf.level = .95)$lower) *100
+      }
+      
+      write.csv(rbind(summary_stats[summary_stats$Stat!="Coverage",], 
+                      summary_stats_cov), "Comp_results_bias_CIs.csv")
+      
+      
+      not_cov <- ggplot(summary_stats[summary_stats$Parameter=="FOI" & summary_stats$Stat!="Coverage",]) + 
+        facet_wrap("Parameter", scales="free")+
+        geom_point(aes(x=Stat,y=Mean,col=Model),size=2, pch = 15,position = position_dodge(width = 0.6)) +
+        geom_errorbar(aes(x=Stat,ymin=Low, ymax=Upp,col=Model),size=1,position = position_dodge(width = 0.6), width=0.4) +
         theme_bw() +
-        labs(x="\nWidth of confidence interval\n\n", y=NULL, col="Model") +
+        labs(x=NULL, y="Value", col=NULL) +
+        theme(axis.text = element_text(size=15),
+              axis.title = element_text(size=15),
+              legend.text=element_text(size=13),
+              strip.text = element_text(size=15),
+              legend.position =  c(0.3,0.8))+
+        ylim(-0.5,1)
+      not_cov2 <- ggplot(summary_stats[summary_stats$Parameter!="FOI" & summary_stats$Stat!="Coverage",]) + 
+        facet_wrap("Parameter", scales="free")+
+        geom_point(aes(x=Stat,y=Mean,col=Model),size=2, pch = 15,position = position_dodge(width = 0.6)) +
+        geom_errorbar(aes(x=Stat,ymin=Low, ymax=Upp,col=Model),size=1,position = position_dodge(width = 0.6), width=0.4) +
+        theme_bw() +
+        labs(x=NULL, y="Value", col=NULL) +
+        theme(axis.text = element_text(size=15),
+              axis.title = element_text(size=15),
+              legend.text=element_text(size=13),
+              strip.text = element_text(size=15),
+              legend.position = "none")+
+        ylim(-0.5,1)
+      cov <- ggplot(summary_stats_cov[summary_starts_cov$Parameter=="FOI",]) + facet_wrap("Parameter")+
+        geom_point(aes(x=Stat,y=(Count/509)*100,col=Model),size=2,pch=15, position = position_dodge(width = 0.6))+
+        geom_errorbar(aes(x=Stat,ymin=Low, ymax=Upp,col=Model),size=1,position = position_dodge(width = 0.6), width=0.4) +
+        theme_bw() +
+        labs(x=NULL, y="Percentage of \nsimulations (%)", col=NULL) +
         theme(axis.text = element_text(size=15),
               axis.title = element_text(size=15),
               legend.text=element_text(size=15),
               legend.title=element_text(size=15),
-              strip.text = element_text(size=15))
-      
-      p2<-ggplot(newdata) + facet_wrap("Parameter", scales="free")+
-        geom_freqpoly(aes(x=bias,col=model), size=1) +
+              strip.text = element_text(size=15),
+              legend.position = "none")+
+        geom_hline(yintercept=95, linetype="dashed")+
+        ylim(0,100)
+      cov2 <- ggplot(summary_stats_cov[summary_starts_cov$Parameter!="FOI",]) + facet_wrap("Parameter")+
+        geom_point(aes(x=Stat,y=(Count/509)*100,col=Model),
+                   size=2,pch=15, 
+                   position = position_dodge(width = 0.6))+
+        geom_errorbar(aes(x=Stat,ymin=Low, ymax=Upp,col=Model),size=1,position = position_dodge(width = 0.6), width=0.4) +
         theme_bw() +
-        labs(x="\nBias (Estimate-True value)\n", y=NULL, col="Model") +
-        geom_vline(linetype="dashed", size=1, xintercept = 0, col="darkgrey") +
+        labs(x=NULL, y="Percentage of \nsimulations (%)", col=NULL) +
         theme(axis.text = element_text(size=15),
               axis.title = element_text(size=15),
-              #legend.position = "none",
               legend.text=element_text(size=15),
               legend.title=element_text(size=15),
-              strip.text = element_text(size=15))
+              strip.text = element_text(size=15),
+              legend.position = "none")+
+        geom_hline(yintercept=95, linetype="dashed")+
+        ylim(0,100)
       
-      png(filename = "Comp_results_bias_uncert.png")
-      z2 <- grid.arrange(p1,p2)
-      dev.off()
-  
-          
-###########################
-## Calculate CIs on bias ##
-###########################
-
-      # FOI
-      MIXDATA_f<- MIXDATA[MIXDATA$Parameter=="FOI",]
-      CATCDATA_f<- CATCDATA[CATCDATA$Parameter=="FOI",]
-      CATVDATA_f<- CATVDATA[CATVDATA$Parameter=="FOI",]
+      plot <- grid.arrange(not_cov, cov, not_cov2, cov2, ncol=2,nrow=2, widths=c(4,2))
+      ggsave(plot, filename = "Sim_bias_CI_cov.png")
       
-     x<- quantile((abs(MIXDATA_f$bias)*100), probs=c(0.5,0.025,0.975))
-     y<- quantile((abs(CATCDATA_f$bias)*100), probs=c(0.5,0.025,0.975))
-     z<- quantile((abs(CATVDATA_f$bias)*100), probs=c(0.5,0.025,0.975))
-      
-      # Seroprevalence
-      MIXDATA_S<- MIXDATA[MIXDATA$Parameter!="FOI",]
-      CATCDATA_S<- CATCDATA[CATCDATA$Parameter!="FOI",]
-      CATVDATA_S<- CATVDATA[CATVDATA$Parameter!="FOI",]
-      
-     u<- quantile((abs(MIXDATA_S$bias)*100), probs=c(0.5,0.025,0.975))
-     v<- quantile((abs(CATCDATA_S$bias)*100), probs=c(0.5,0.025,0.975))
-     w<- quantile((abs(CATVDATA_S$bias)*100), probs=c(0.5,0.025,0.975))
-     
-     results_bias <- data.frame(Param = rep(c("FOI", "SP"),times=3),
-                                Model = rep(c("MIX", "CATV", "CATC"), each=2),
-                                q50 = c(x[1], u[1], z[1], w[1], y[1], v[1]),
-                                qlow = c(x[2], u[2], z[2], w[2], y[2], v[2]),
-                                qupp = c(x[3], u[3], z[3], w[3], y[3], v[3]))
-     
-     write.csv(results_bias, "Comp_results_bias_CIs.csv")
-
-
-
-
-

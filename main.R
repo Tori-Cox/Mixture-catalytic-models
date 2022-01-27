@@ -12,6 +12,8 @@ library(serostat) # if using a version of R where this package cannot be downloa
 library(scales)
 library(gridExtra)
 library(grid)
+library(ggpmisc)
+library(ggpubr)
 
 ## create output directory
 dir.create("model_output")

@@ -13,7 +13,8 @@
                                 mu1=NA, mu1_low=NA, mu1_upp=NA,
                                 sd0=NA, sd0_low=NA, sd0_upp=NA,
                                 sd1=NA, sd1_low=NA, sd1_upp=NA,
-                                chisq=NA, p=NA, seroprev=NA, seroprev_low=NA, seroprev_upp=NA,
+                                chisq=NA, p=NA, AIC=NA, df=NA,
+                                seroprev=NA, seroprev_low=NA, seroprev_upp=NA,
                                 foi =NA, foi_low =NA, foi_upp =NA)
     
 
@@ -21,34 +22,34 @@
     data <- readRDS("MixtureSims.rds")
     
 ## loop
-    for(sim_num in 1:200){
+    for(sim_num in 1:540){
      
     data_sub <- data[[sim_num]]
-    z<-data_sub$seroval 
+    z<-data_sub$seroval[data_sub$seroval<10] #constrain to remove outliers 
     breaks = 50
     mixdat <- mixgroup(z, breaks) # functions from mixdist package to group data
-    mixpar <- mixparam(pi=c(0.5, 0.5), mu = c(0.5,3), sigma = c(1, 1))
+    mixpar <- mixparam(pi=c(0.5, 0.5), mu = c(0.5,3), sigma = c(0.5, 0.5))
     constr = list(conpi = "NONE", conmu = "NONE", consigma = "NONE", 
                   fixpi = NULL, fixmu = NULL, fixsigma = NULL, cov = NULL, size = NULL)
     
     weibull_norm <- list()
-    weibull_norm$chisq <- NA 
+    weibull_norm$AIC <- NA 
     weibull_gamma <- list()
-    weibull_gamma$chisq <- NA
+    weibull_gamma$AIC <- NA
     weibull_weibull <- list()
-    weibull_weibull$chisq <- NA
+    weibull_weibull$AIC <- NA
     gamma_weibull <- list()
-    gamma_weibull$chisq <- NA
+    gamma_weibull$AIC <- NA
     gamma_gamma <- list()
-    gamma_gamma$chisq <- NA
+    gamma_gamma$AIC <- NA
     gamma_norm <- list()
-    gamma_norm$chisq <- NA
+    gamma_norm$AIC <- NA
     norm_weibull <- list()
-    norm_weibull$chisq <- NA
+    norm_weibull$AIC <- NA
     norm_norm <- list()
-    norm_norm$chisq <- NA
+    norm_norm$AIC <- NA
     norm_gamma <- list()
-    norm_gamma$chisq <- NA
+    norm_gamma$AIC <- NA
     
     tryCatch({
       weibull_weibull <- mix(mixdat, mixpar,  dist1="weibull",  dist2="weibull", emsteps = 1,  exptol = 5e-06, constr=constr)
@@ -96,21 +97,21 @@
       print(paste("Unable to fit GG mixture distribution to Sim", sim_num, sep=' '))
     })
 
-    #choosing optimal distribution pair based on chisq
-    df <- data.frame(Chisq <- c(weibull_norm$chisq, weibull_gamma$chisq, weibull_weibull$chisq,
-                                norm_norm$chisq, norm_gamma$chisq, norm_weibull$chisq,
-                                gamma_norm$chisq, gamma_gamma$chisq, gamma_weibull$chisq))
-    colnames(df) <- "Chisq"
-    c_min <- min(df$Chisq, na.rm = TRUE)
+    #choosing optimal distribution pair based on AIC
+    df <- data.frame(AIC <- c(weibull_norm$AIC, weibull_gamma$AIC, weibull_weibull$AIC,
+                              norm_norm$AIC, norm_gamma$AIC, norm_weibull$AIC,
+                              gamma_norm$AIC, gamma_gamma$AIC, gamma_weibull$AIC))
+    colnames(df) <- "AIC"
+    c_min <- min(df$AIC, na.rm = TRUE)
     
-    if(is.na(weibull_weibull$chisq)==TRUE | weibull_weibull$chisq != c_min){
-      if(is.na(weibull_norm$chisq)==TRUE | weibull_norm$chisq != c_min){
-        if(is.na(weibull_gamma$chisq)==TRUE | weibull_gamma$chisq != c_min){
-          if(is.na(norm_weibull$chisq)==TRUE | norm_weibull$chisq != c_min){
-            if(is.na(norm_norm$chisq)==TRUE | norm_norm$chisq != c_min){
-              if(is.na(norm_gamma$chisq)==TRUE | norm_gamma$chisq != c_min){
-                if(is.na(gamma_gamma$chisq)==TRUE | gamma_gamma$chisq != c_min){
-                  if(is.na(gamma_norm$chisq)==TRUE | gamma_norm$chisq != c_min){
+    if(is.na(weibull_weibull$AIC)==TRUE | weibull_weibull$AIC != c_min){
+      if(is.na(weibull_norm$AIC)==TRUE | weibull_norm$AIC != c_min){
+        if(is.na(weibull_gamma$AIC)==TRUE | weibull_gamma$AIC != c_min){
+          if(is.na(norm_weibull$AIC)==TRUE | norm_weibull$AIC != c_min){
+            if(is.na(norm_norm$AIC)==TRUE | norm_norm$AIC != c_min){
+              if(is.na(norm_gamma$AIC)==TRUE | norm_gamma$AIC != c_min){
+                if(is.na(gamma_gamma$AIC)==TRUE | gamma_gamma$AIC != c_min){
+                  if(is.na(gamma_norm$AIC)==TRUE | gamma_norm$AIC != c_min){
                     choice <- gamma_weibull}
                   
                   else{choice <- gamma_norm}
@@ -129,7 +130,7 @@
     source("scripts/plotting_mixture_model_1.R") 
    
     }
-    write.csv(stored_params, file = "model_output/mixture/Mix_fit_params.csv") #save params for the 200 simulated datasets
+    write.csv(stored_params, file = "model_output/mixture/Mix_fit_params.csv") #save params for the simulated datasets
     
     
  
@@ -138,20 +139,15 @@
 ## STEP 2 - calculating seroprevalence & FOI ##
 ###############################################
     
+    stored_params <- read.csv("model_output/mixture/Mix_fit_params.csv")
     
-    ## prepare storage data frame for params 
-    stored_params <- data.frame(sim=1:200, seroprev=NA, seroprev_low=NA, seroprev_upp=NA, foi =NA, foi_low =NA, foi_upp =NA)
-    mixfit_params <- read.csv("model_output/mixture/Mix_fit_params.csv")
-    mixfit_params<-mixfit_params[,-c(1, 18:24)]
-    stored_params <- merge(mixfit_params, stored_params, by="sim")
-      
     ## loop
     data <- readRDS("MixtureSims.rds")
-    for(sim_num in 1:200){
+    for(sim_num in 1:540){
       data_sub <- data[[sim_num]]
       
-      z<-data_sub$seroval  
-      a<-data_sub$age+0.5 
+      z<-data_sub$seroval[data_sub$seroval<10]  
+      a<-data_sub$age[data_sub$seroval<10] +0.5
       z_and_a <- data.frame(z=z, a=a)
       agemin <- min(data_sub$age)+0.5
       agemax <- max(data_sub$age)+0.5
@@ -182,7 +178,7 @@
         SigS	<- stored_params$sd0[sim_num]
         SigI	<- stored_params$sd1[sim_num]
         
-        seroprevalence <- seroprev_cis(B=10000, mu_a_data = spline_mu, agemin=agemin, agemax=agemax, muS=muS, muI=muI, SigS=SigS, SigI=SigI)
+        seroprevalence <- seroprev_cis(B=5000, mu_a_data = spline_mu, agemin=agemin, agemax=agemax, muS=muS, muI=muI, SigS=SigS, SigI=SigI)
         
         z_and_a$tally <- 1
         z_and_a_agg <- merge(data.frame(Group.1=min(z_and_a$a):max(z_and_a$a)),
@@ -205,7 +201,7 @@
         
     
     ## estimate FOI
-        FOI <- FOI_cis(B=10000, mu_a_data = spline_mu, mu_deriv_data = spline_deriv, agemin=agemin, agemax=agemax, muI=muI)
+        FOI <- FOI_cis(B=5000, mu_a_data = spline_mu, mu_deriv_data = spline_deriv, agemin=agemin, agemax=agemax, muI=muI)
         
         FOI_values  <- FOI[[1]]   
         FOI_var <- FOI[[2]]
@@ -217,6 +213,7 @@
     source("scripts/plotting_mixture_model_2.R")
         
     }
+    stored_params[c(21:23)][stored_params$seroprev>1,]<-NA
     
     write.csv(stored_params, file = "model_output/mixture/Mix_fit_and_est_params.csv")
     

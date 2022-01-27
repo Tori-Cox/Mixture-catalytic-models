@@ -259,10 +259,19 @@
   df <- attr(mixlike(mixdat, fitpar, dist1, dist2, constr, nlmobj$est, 
                      exptol), "df")
   P <- 1 - pchisq(chisq, df)
-  mixfit <- list(parameters = param, distribution = list(dist1, dist2), se = vmat$mixse, 
-                 chisq = chisq, P = P,df=df, vmat = vmat$vmat, 
-                 mixdata = mixdat)
   
+  k <- 5 # number of estimated parameters if unconstrained (pi0,mu0,mu1,sd1,sd0)
+      #if(constr$fixsigma[1]==T){
+      #  k<-k-1
+      #}
+      #if(constr$fixsigma[2]==T){
+      #  k<-k-1
+      # }
+  AIC <- 2*k + chisq ## compute AIC using minimised deviance and number of parameters 
+  
+  mixfit <- list(parameters = param, distribution = list(dist1, dist2), se = vmat$mixse, 
+                 chisq = chisq, AIC=AIC, P = P,df=df, vmat = vmat$vmat, 
+                 mixdata = mixdat)
   print(c("Params from second stage", mixfit$parameters))
   return(mixfit)
   

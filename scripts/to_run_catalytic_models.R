@@ -15,10 +15,10 @@ store_spC<-list()
 
 
 ## loop
-for(sim in 1:200){
+for(sim in 1:540){
   
   original <- original_all[[sim]]
-  original <- original[original$sero!="Equivical", ]
+  original <- original[original$sero!="Equivocal", ]
   original$sero <- as.numeric(original$sero)
   
   loc.all <- data_processing(original) #function in cat_model_functions.R

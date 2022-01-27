@@ -32,7 +32,7 @@
     write.csv(Results, file=paste("model_output/catalytic/Cat_", sim, "_SummaryResults.csv", sep=""))
     
     
-    ## enter into storage list for all 200 datasets
+    ## enter into storage list for all 540 datasets
     store_foiC[[sim]] <- c(fit.c_CI[[1]], fit.c_CI[[2]],fit.c_CI[[3]])
     store_foiV[[sim]] <- c(mean(fit.v_CI[[1]]), mean(fit.v_CI[[2]]), mean(fit.v_CI[[3]]))
     store_spC[[sim]] <- c(SP_total_c[1], SP_total_c[2], SP_total_c[3])

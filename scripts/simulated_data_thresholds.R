@@ -9,7 +9,7 @@ original_all <- readRDS("MixtureSims.RDS")
 
 ## estimate thresholds for each of the 200 simulated datasets 
 stored_thresholds<-list()
-for(sim in 1:200){
+for(sim in 1:540){
   original<-original_all[[sim]]
   
   #'status' is the true serostatus, 'sero' is the estimated serostatus based on optimised thresholds
@@ -32,7 +32,7 @@ saveRDS(stored_thresholds, "MixtureSims_thresholds.RDS")
 ## calculate misclassifcation rates
 
 new_all<-list()
-for(sim in 1:200){
+for(sim in 1:540){
   original<-original_all[[sim]]
   original$sero<-NA
   par <- stored_thresholds[[sim]]
@@ -46,14 +46,14 @@ for(sim in 1:200){
       original$sero[i] <- 1
     }
     if(original$seroval[i] > par[1] & original$seroval[i] < par[2]){
-      original$sero[i] <- "Equivical"
+      original$sero[i] <- "Equivocal"
     }
   }
   new_all[[sim]] <- original
 }
 
 correct_classification<-NA
-for(sim in 1:200){
+for(sim in 1:540){
   new_single<-new_all[[sim]]
   new_single$sum<-NA
   for(i in 1:nrow(new_single)){
