@@ -8,7 +8,7 @@
 ##################################
 
 ## prepare storage dataframe for params 
-    stored_params <- data.frame(sim=1:200, dist0=NA, dist1=NA,
+    stored_params <- data.frame(sim=1:540, dist0=NA, dist1=NA,
                                 mu0=NA, mu0_low=NA, mu0_upp=NA,
                                 mu1=NA, mu1_low=NA, mu1_upp=NA,
                                 sd0=NA, sd0_low=NA, sd0_upp=NA,
