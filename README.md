@@ -1,6 +1,6 @@
 # Mixture-catalytic-models
 
-This repository contains code to recreate the simulation study in the paper 'Estimating dengue transmission intensity from serological data: a comparative analysis using mixture and catalytic models' (unpublished). 
+This repository contains code to recreate the simulation study in the paper 'Estimating dengue transmission intensity from serological data: A comparative analysis using mixture and catalytic models' (https://doi.org/10.1371/journal.pntd.0010592). 
 
 ## Repository overview
 This repository contains scripts to:
